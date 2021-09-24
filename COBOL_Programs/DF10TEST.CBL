@@ -45,6 +45,9 @@
               DISPLAY 'DF10TEST INVALID FIELD = ' WS-INPUT-FIELD
                                                   UPON CONSOLE
            END-IF.
+           
+           DISPLAY 'DF10TEST INPUT FIELD = ' WS-INPUT-FIELD
+                                             UPON CONSOLE.
 
        1000-END-OF-JOB.
 

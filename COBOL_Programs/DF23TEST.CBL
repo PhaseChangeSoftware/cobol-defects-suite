@@ -1,12 +1,12 @@
        IDENTIFICATION DIVISION.
-       
-       PROGRAM-ID. DF08TEST.
 
-      *REMARKS:    COBOL SOURCE CODE FOR SNIPPLET 08 DEFECT
+       PROGRAM-ID. DF23TEST.
+
+      *REMARKS:    COBOL SOURCE CODE FOR SNIPPLET 23 DEFECT
 
       ******************************************************************
-      ****     ERROR IN SEARCH STATEMENT ON USE OF TABLE INDEX      ****
-      ****     (CAUSED BY INCORRECT DEFINITION OF TABLE INDEX)      ****
+      ****  ERROR IN SEARCH ON USE OF INDEX ARITHMETIC EXPRESSION   ****
+      ****  (CAUSED BY INCORRECT CHECK FOR MAXIMUM TABLE ENTRIES)   ****
       ******************************************************************
 
        ENVIRONMENT DIVISION.
@@ -30,33 +30,36 @@
                10 WS-TABLE-ENTRY-4      PIC X(03) VALUE '904'.
                10 WS-TABLE-ENTRY-5      PIC X(03) VALUE '905'.
 
-      **** BEFORE CODE BEGINS (PROBLEM)
-      **** 01 WS-TABLE-MATRIX           REDEFINES WS-SEARCH-TABLE.
-      ****     05 WS-TABLE-ENTRIES      OCCURS 5 TIMES.
-      ****         10 WS-TABLE-ENTRY    PIC X(03).
-      ****     88  WS-SUB               PIC S9(01).  [INCORRECT USAGE]
-      **** BEFORE CODE ENDS (PROBLEM)
-
-      **** AFTER CODE BEGINS (CORRECT)
        01  WS-SEARCH-TABLE-R            REDEFINES WS-SEARCH-TABLE.
-           05 WS-TABLE-ENTRIES          OCCURS 5 TIMES
-                                        INDEXED BY WS-SUB.
-               10 WS-TABLE-ENTRY        PIC X(03).
-      **** AFTER CODE ENDS (CORRECT)
-
-       01  WS-INPUT-FIELD               PIC X(03) VALUE '903'.
-       01  WS-SEARCH-RESULT             PIC X(03) VALUE SPACES.
+           05 WS-TABLE-ENTRIES         OCCURS 5 TIMES
+                                       INDEXED BY WS-SUB.
+               10 WS-TABLE-ENTRY       PIC X(03).
+      
+       01  WS-INPUT-FIELD             PIC X(3) VALUE '903'.
+       01  WS-SEARCH-RESULT           PIC X(3) VALUE SPACES.
 
        PROCEDURE DIVISION.
 
        1000-START-OF-JOB.
 
-           DISPLAY 'DF08TEST START OF JOB' UPON CONSOLE.
+           DISPLAY 'DF23TEST START OF JOB' UPON CONSOLE.
 
        1000-SEARCH-TABLE.
-           
+
+      **** BEFORE CODE BEGINS (PROBLEM)
+      *    SEARCH WS-TABLE-ENTRIES
+      *        AT END
+      *            GO TO 1000-END-OF-JOB
+      *        WHEN WS-TABLE-ENTRY (WS-SUB) = WS-INPUT-FIELD
+      *        AND
+      *        WS-SUB + 1 < 6       [INCORRECT ARITHMETIC EXPRESSION]
+      *            MOVE WS-TABLE-ENTRY (WS-SUB)
+      *                                TO WS-SEARCH-RESULT
+      *    END-SEARCH.
+      **** BEFORE CODE ENDS (PROBLEM)
+
+      **** AFTER CODE BEGINS (CORRECT)
            SET WS-SUB                  TO +1.
-       
            SEARCH WS-TABLE-ENTRIES
                AT END
                    GO TO 1000-END-OF-JOB
@@ -64,12 +67,14 @@
                    MOVE WS-TABLE-ENTRY (WS-SUB)
                                        TO WS-SEARCH-RESULT
            END-SEARCH.
-           
-           DISPLAY 'DF08TEST SEARCH RESULT = ' WS-SEARCH-RESULT 
+      **** AFTER CODE ENDS (CORRECT)
+      
+           DISPLAY 'DF23TEST SEARCH RESULT = ' WS-SEARCH-RESULT
                                                UPON CONSOLE.
-           
+      
        1000-END-OF-JOB.
 
-           DISPLAY 'DF08TEST END OF JOB' UPON CONSOLE.
+           DISPLAY 'DF23TEST END OF JOB' UPON CONSOLE.
 
            GOBACK.
+

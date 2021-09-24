@@ -55,7 +55,7 @@
                GO TO 1000-END-OF-JOB
            END-IF.
 
-       1000-READ-INPUT-RECORD.
+       1000-READ-INPUT-FILE.
 
            READ INPUT-FILE.
 
@@ -68,7 +68,7 @@
 
       **** AFTER CODE BEGINS (CORRECT)
            IF INPUT-STATUS = '00'
-               GO TO 1000-PROCESS-INPUT-RECORD
+               NEXT SENTENCE
            ELSE
            IF INPUT-STATUS = '10'
                GO TO 1000-CLOSE-INPUT-FILE
@@ -77,14 +77,11 @@
                GO TO 1000-END-OF-JOB
            END-IF.
       **** AFTER CODE ENDS (CORRECT)
-
-       1000-PROCESS-INPUT-RECORD.
-
-      **** ADD CODE TO PROCESS INPUT RECORD (IF NEEDED)
-
-       1000-READ-NEXT-INPUT-RECORD.
-
-           GO TO 1000-READ-INPUT-RECORD.
+      
+           DISPLAY 'DF03TEST INPUT RECORD = ' INPUT-RECORD
+                                              UPON CONSOLE.
+      
+           GO TO 1000-READ-INPUT-FILE.
 
        1000-CLOSE-INPUT-FILE.
 

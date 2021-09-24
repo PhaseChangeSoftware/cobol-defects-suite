@@ -46,8 +46,12 @@
 
            COMPUTE WS-INTEGER-DATE-1 = FUNCTION
                    INTEGER-OF-DATE (WS-GREGORIAN-DATE).
+           
            COMPUTE WS-INTEGER-DATE-2 = FUNCTION
                    INTEGER-OF-DATE (WS-GREGORIAN-DATE).
+           
+           DISPLAY 'DF15TEST INTEGER DATE 2 = ' WS-INTEGER-DATE-2
+                                                UPON CONSOLE.
 
        1000-END-OF-JOB.
 

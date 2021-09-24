@@ -22,15 +22,15 @@
        WORKING-STORAGE SECTION.
 
       **** BEFORE CODE BEGINS (PROBLEM)
-      *01 WS-RAN                       PIC 9(1)V   VALUE ZEROES.
-      *                                [INCORRECT PICTURE]
-      *01 WS-RAN-DISP                  PIC S9(1)   VALUE ZEROES.
+      *01 WS-RAND                      PIC 9(1)V   VALUE ZEROES.
+      *                                  [INCORRECT PICTURE]
+      *01 WS-RAND-DISP                 PIC S9(1)   VALUE ZEROES.
       **** BEFORE CODE ENDS (PROBLEM)
 
       **** AFTER CODE BEGINS (CORRECT)
-       01 WS-RAN                       PIC S9(1)  VALUE +9
+       01 WS-RAND                      PIC S9(1)  VALUE +9
                                                   USAGE COMP-3.
-       01 WS-RAN-DISP                  PIC S9(1)  VALUE ZEROES.
+       01 WS-RAND-DISP                 PIC S9(1)  VALUE ZEROES.
       **** AFTER CODE ENDS (CORRECT)
 
        PROCEDURE DIVISION.
@@ -44,7 +44,7 @@
       **** BEFORE CODE BEGINS (PROBLEM)
       **** EXEC SQL
       **** SELECT DECIMAL(WS-RAND() * 10)
-      **** INTO :WS-RAN
+      **** INTO :WS-RAND
       **** FROM SYSIBM.SYSDUMMY1
       **** END-EXEC.
       **** BEFORE CODE ENDS(PROBLEM)
@@ -54,6 +54,9 @@
       ****    NO SQL DIRECIVES HAVE NOT BEEN SET IN DEVELOPER YET  ****
       ******************************************************************
       **** AFTER CODE ENDS (CORRECT)
+
+           DISPLAY 'DF16TEST RANDOM NUMBER = ' WS-RAND
+                                              UPON CONSOLE.
 
        1000-END-OF-JOB.
 

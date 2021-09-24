@@ -74,7 +74,10 @@
                         WS-OUTPUT-FIELD-10
            END-UNSTRING.
       **** AFTER CODE ENDS (CORRECT)
-
+      *
+           DISPLAY 'DF09TEST OUTPUT FIELDS = ' WS-OUTPUT-FIELDS
+                                               UPON CONSOLE.
+           
        1000-END-OF-JOB.
 
            DISPLAY 'DF09TEST END OF JOB' UPON CONSOLE.

@@ -10,7 +10,8 @@
 
        FILE-CONTROL.
 
-           SELECT OUTPUT-FILE      ASSIGN TO DF21FIL1.
+           SELECT OUTPUT-FILE      ASSIGN TO DF21FIL1
+                                   FILE STATUS IS OUTPUT-STATUS.
 
        DATA DIVISION.
 
@@ -25,11 +26,13 @@
 
        WORKING-STORAGE SECTION.
 
-       01  WS-DF21-RECORD-1             PIC X(80) VALUE 'DF21 RECORD 1'.
-       01  WS-DF21-RECORD-2             PIC X(80) VALUE 'DF21 RECORD 2'.
-       01  WS-DF21-RECORD-3             PIC X(80) VALUE 'DF21 RECORD 3'.
-       01  WS-DF21-RECORD-4             PIC X(80) VALUE 'DF21 RECORD 4'.
-       01  WS-DF21-RECORD-5             PIC X(80) VALUE 'DF21 RECORD 5'.
+       01  OUTPUT-STATUS               PIC X(02) VALUE SPACES.
+
+       01  WS-DF21-RECORD-1            PIC X(80) VALUE 'DF21 RECORD 1'.
+       01  WS-DF21-RECORD-2            PIC X(80) VALUE 'DF21 RECORD 2'.
+       01  WS-DF21-RECORD-3            PIC X(80) VALUE 'DF21 RECORD 3'.
+       01  WS-DF21-RECORD-4            PIC X(80) VALUE 'DF21 RECORD 4'.
+       01  WS-DF21-RECORD-5            PIC X(80) VALUE 'DF21 RECORD 5'.
 
        PROCEDURE DIVISION.
 
@@ -41,17 +44,65 @@
 
            OPEN OUTPUT OUTPUT-FILE.
 
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA OPEN ERROR' UPON CONSOLE
+               GO TO 1000-END-OF-JOB
+           END-IF.
+
        1000-WRITE-OUTPUT-RECORDS.
 
            WRITE OUTPUT-RECORD         FROM WS-DF21-RECORD-1.
+
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA WRITE ERROR 1' UPON CONSOLE
+               GO TO 1000-END-OF-JOB.
+
            WRITE OUTPUT-RECORD         FROM WS-DF21-RECORD-2.
+
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA WRITE ERROR 2' UPON CONSOLE
+               GO TO 1000-END-OF-JOB.
+
            WRITE OUTPUT-RECORD         FROM WS-DF21-RECORD-3.
+
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA WRITE ERROR 3' UPON CONSOLE
+               GO TO 1000-END-OF-JOB.
+
            WRITE OUTPUT-RECORD         FROM WS-DF21-RECORD-4.
+
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA WRITE ERROR 4' UPON CONSOLE
+               GO TO 1000-END-OF-JOB.
+
            WRITE OUTPUT-RECORD         FROM WS-DF21-RECORD-5.
+
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA WRITE ERROR 5' UPON CONSOLE
+               GO TO 1000-END-OF-JOB.
 
        1000-CLOSE-OUTPUT-FILE.
 
            CLOSE OUTPUT-FILE.
+
+           IF OUTPUT-STATUS = '00'
+               NEXT SENTENCE
+           ELSE
+               DISPLAY 'DF21DATA CLOSE ERROR' UPON CONSOLE
+               GO TO 1000-END-OF-JOB
+           END-IF.
 
        1000-END-OF-JOB.
 

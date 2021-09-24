@@ -7,7 +7,7 @@
       ******************************************************************
       ****    ERROR IN WRITING RECORDS TO KSDS FILE (STATUS 92)     ****
       ****    (CAUSE DUE TO RECORD SIZE CONFLICT ON KSDS FILE)      ****
-      ****    (NOTE: CHANGES WERE NOT NEEDED TO RESOLVE DEFECT)     ****
+      ****    (NOTE: CODE CHANGES NOT NEEDED TO RESOLVE DEFECT)     ****
       ******************************************************************
 
        ENVIRONMENT DIVISION.
@@ -71,7 +71,7 @@
            IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
-               DISPLAY 'DF03TEST OPEN ERROR ON FILE 2' UPON CONSOLE
+               DISPLAY 'DF21TEST OPEN ERROR ON FILE 2' UPON CONSOLE
                GO TO 1000-END-OF-JOB
            END-IF.
 
@@ -98,7 +98,10 @@
                DISPLAY 'DF21TEST WRITE ERROR ON FILE 2' UPON CONSOLE
                GO TO 1000-END-OF-JOB
            END-IF.
-
+           
+           DISPLAY 'DF21TEST OUTPUT RECORD = ' INPUT-RECORD
+                                               UPON CONSOLE.  
+           
        1000-READ-NEXT-INPUT-RECORD.
 
            GO TO 1000-READ-INPUT-FILE.

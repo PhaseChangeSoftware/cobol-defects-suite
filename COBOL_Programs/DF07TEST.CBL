@@ -51,6 +51,9 @@
                MOVE WS-INPUT-FIELD     TO WS-OUTPUT-FIELD
            END-IF.
       **** AFTER CODE ENDS (CORRECT)
+      
+           DISPLAY 'DF07TEST OUTPUT FIELD = ' WS-OUTPUT-FIELD
+                                              UPON CONSOLE.
 
        1000-END-OF-JOB.
 

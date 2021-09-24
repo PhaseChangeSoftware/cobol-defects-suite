@@ -57,12 +57,16 @@
            PERFORM 1000-LOOP-PEPNOTE THRU 1000-EXIT
                VARYING GRP-COUNT FROM 1 BY 1
                    UNTIL GRP-COUNT GREATER THAN 5.
-
+           
            GO TO 1000-END-OF-JOB.
 
        1000-LOOP-PEPNOTE.
 
            MOVE GRP-PEPNOTE-DATA (GRP-COUNT) TO GRP-RESULT.
+           
+           DISPLAY 'DF13TEST PEP DATA = ' GRP-RESULT
+                                          UPON CONSOLE
+
 
        1000-EXIT. EXIT.
 

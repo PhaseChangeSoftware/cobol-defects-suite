@@ -46,12 +46,14 @@
            05 FILLER                   PIC X(01)     VALUE SPACES.
            05 WS-DD-1                  PIC 9(02)     VALUE ZERO.
            05 FILLER                   PIC X(09)     VALUE SPACES.
+           
        01  WS-DUE-DATE-2.
            05 WS-YYYY-2                PIC 9(4)      VALUE ZERO.
            05 WS-MM-2                  PIC 9(2)      VALUE ZERO.
            05 WS-DD-2                  PIC 9(2)      VALUE ZERO.
            05 WS-NULL-2                PIC 9(1)      VALUE ZERO.
-       01 WS-HOST-DUE-DATE             PIC S9(9)     VALUE ZERO  COMP.
+           
+       01 WS-HOST-DUE-DATE             PIC S9(9)     VALUE ZERO.
       **** AFTER CODE ENDS (CORRECT)
 
        PROCEDURE DIVISION.
@@ -86,6 +88,9 @@
                 GO TO 1000-END-OF-JOB
            END-IF.
       **** AFTER CODE ENDS (CORRECT)
+      *
+           DISPLAY 'DF19TEST HOST DUE DATE = ' WS-HOST-DUE-DATE
+                                               UPON CONSOLE.
 
        1000-END-OF-JOB.
 

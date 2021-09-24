@@ -54,7 +54,7 @@
                GO TO 1000-END-OF-JOB
            END-IF.
 
-       1000-READ-INPUT-RECORD.
+       1000-READ-INPUT-FILE.
 
       **** BEFORE CODE BEGINS (PROBLEM)
       **** READ INPUT-FILE
@@ -77,14 +77,11 @@
                DISPLAY 'DF01TEST READ ERROR' UPON CONSOLE
                GO TO 1000-END-OF-JOB
            END-IF.
+           
+           DISPLAY 'DF01TEST INPUT RECORD = ' INPUT-RECORD
+                                              UPON CONSOLE.
 
-       1000-PROCESS-INPUT-RECORD.
-
-      **** ADD CODE TO PROCESS INPUT RECORD IF NEEDED
-
-      1000-READ-NEXT-INPUT-RECORD.
-
-           GO TO 1000-READ-INPUT-RECORD.
+           GO TO 1000-READ-INPUT-FILE.
 
        1000-CLOSE-INPUT-FILE.
 

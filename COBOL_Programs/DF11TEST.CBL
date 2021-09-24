@@ -49,10 +49,9 @@
                        INTO  WS-FILE-NAME
            END-STRING.
       **** AFTER CODE ENDS (CORRECT)
-
-       1000-END-OF-JOB.
-
-           DISPLAY 'DF11TEST END OF JOB' UPON CONSOLE.
+      
+           DISPLAY 'DF11TEST FILE NAME = ' WS-FILE-NAME
+                                           UPON CONSOLE. 
 
            GOBACK.
 

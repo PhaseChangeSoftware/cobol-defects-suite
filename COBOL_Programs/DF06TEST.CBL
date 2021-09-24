@@ -44,6 +44,14 @@
                   (SALES-AMOUNT OF SALES-RECORD * .08).
       **** AFTER CODE ENDS (CORRECT)
 
+           DISPLAY 'DF06TEST SALES AMOUNT = ' SALES-AMOUNT    
+                                           OF SALES-RECORD
+                                              UPON CONSOLE.
+
+           DISPLAY 'DF06TEST SALES TAX = ' SALES-AMOUNT    
+                                        OF DETAIL-LINE
+                                           UPON CONSOLE.
+           
        1000-END-OF-JOB.
 
            DISPLAY 'DF06TEST END OF JOB' UPON CONSOLE.

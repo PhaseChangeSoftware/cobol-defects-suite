@@ -6,7 +6,7 @@
 
       ******************************************************************
       ****    PROBLEM WITH MOVE STATEMENT TO RIGHT-ADJUST FIELD     ****
-      *       (CAUSED BY OVERLAPPING OF DATA AFTER DATA CHANGED)    ****
+      ****    (CAUSED BY OVERLAPPING OF DATA AFTER DATA CHANGED)    ****
       ******************************************************************
 
        ENVIRONMENT DIVISION.
@@ -66,13 +66,15 @@
                MOVE '0000'             TO WS-O-CTL-4.
       **** AFTER CODE ENDS (CORRECT)
 
-       1000-DISPLAY-AFTER-ADJUSTED.
-
-           DISPLAY 'DF04TEST O-CTL-1 = ' WS-O-CTL-1 UPON CONSOLE.
-           DISPLAY 'DF04TEST O-CTL-2 = ' WS-O-CTL-2 UPON CONSOLE.
-           DISPLAY 'DF04TEST O-CTL-3 = ' WS-O-CTL-3 UPON CONSOLE.
-           DISPLAY 'DF04TEST O-CTL-4 = ' WS-O-CTL-4 UPON CONSOLE.
-
+           DISPLAY 'DF04TEST CONTROL 1 = ' WS-O-CTL-1
+                                           UPON CONSOLE.
+           DISPLAY 'DF04TEST CONTROL 2 = ' WS-O-CTL-2
+                                           UPON CONSOLE.
+           DISPLAY 'DF04TEST CONTROL 3 = ' WS-O-CTL-3
+                                           UPON CONSOLE.
+           DISPLAY 'DF04TEST CONTROL 4 = ' WS-O-CTL-4
+                                           UPON CONSOLE.
+          
        1000-END-OF-JOB.
 
            DISPLAY 'DF04TEST END OF JOB' UPON CONSOLE.

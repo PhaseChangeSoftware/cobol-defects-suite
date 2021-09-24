@@ -1,9 +1,9 @@
-       IDENTIFICATION DIVISION.
+        IDENTIFICATION DIVISION.
 
        PROGRAM-ID. DF03DATA.
 
       *REMARKS:    COBOL SOURCE CODE FOR SNIPPLET 03 TEST DATA
-      *
+
        ENVIRONMENT DIVISION.
 
        INPUT-OUTPUT SECTION.
@@ -31,17 +31,13 @@
 
        WORKING-STORAGE SECTION.
 
+       01  OUTPUT-STATUS                PIC X(02) VALUE SPACES.
+
        01  WS-DF03-RECORD-1             PIC X(80) VALUE 'DF03 RECORD 1'.
        01  WS-DF03-RECORD-2             PIC X(80) VALUE 'DF03 RECORD 2'.
        01  WS-DF03-RECORD-3             PIC X(80) VALUE 'DF03 RECORD 3'.
        01  WS-DF03-RECORD-4             PIC X(80) VALUE 'DF03 RECORD 4'.
        01  WS-DF03-RECORD-5             PIC X(80) VALUE 'DF03 RECORD 5'.
-
-       01  OUTPUT-STATUS                PIC X(02) VALUE SPACES.
-
-           88 PCS-NO-ERROR              VALUE '00'.
-           88 PCS-DUP-KEY               VALUE '30'.
-           88 PCS-NO-RECORD             VALUE '92'.
 
        PROCEDURE DIVISION.
 
@@ -53,7 +49,7 @@
 
            OPEN OUTPUT OUTPUT-FILE.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA OPEN ERROR' UPON CONSOLE
@@ -64,7 +60,7 @@
 
            WRITE OUTPUT-RECORD    FROM WS-DF03-RECORD-1.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA WRITE ERROR 1' UPON CONSOLE
@@ -72,7 +68,7 @@
 
            WRITE OUTPUT-RECORD    FROM WS-DF03-RECORD-2.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA WRITE ERROR 2' UPON CONSOLE
@@ -81,7 +77,7 @@
 
            WRITE OUTPUT-RECORD    FROM WS-DF03-RECORD-3.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA WRITE ERROR 3' UPON CONSOLE
@@ -90,7 +86,7 @@
 
            WRITE OUTPUT-RECORD    FROM WS-DF03-RECORD-4.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA WRITE ERROR 4' UPON CONSOLE
@@ -99,7 +95,7 @@
 
            WRITE OUTPUT-RECORD    FROM WS-DF03-RECORD-5.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA WRITE ERROR 5' UPON CONSOLE
@@ -110,7 +106,7 @@
 
            CLOSE OUTPUT-FILE.
 
-           IF PCS-NO-ERROR
+           IF OUTPUT-STATUS = '00'
                NEXT SENTENCE
            ELSE
                DISPLAY 'DF03DATA CLOSE ERROR' UPON CONSOLE
@@ -122,3 +118,4 @@
            DISPLAY 'DF03DATA END OF JOB' UPON CONSOLE.
 
            GOBACK.
+

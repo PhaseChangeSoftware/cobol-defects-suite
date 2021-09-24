@@ -1,4 +1,4 @@
-       IDENTIFICATION DIVISION.
+        IDENTIFICATION DIVISION.
 
        PROGRAM-ID. DF05TEST.
 
@@ -25,7 +25,8 @@
        FILE SECTION.
 
        FD  INPUT-FILE
-
+           RECORDING MODE IS F
+           RECORD CONTAINS 80 CHARACTERS
            DATA RECORD IS INPUT-RECORD.
 
        01  INPUT-RECORD.
@@ -34,7 +35,8 @@
            05  FILLER                  PIC X(67).
 
        SD  SORT-FILE
-
+           RECORDING MODE IS F
+           RECORD CONTAINS 80 CHARACTERS
            DATA RECORD IS SORT-RECORD.
 
        01  SORT-RECORD.
@@ -45,7 +47,7 @@
        WORKING-STORAGE SECTION.
 
        01  WS-INPUT-STATUS             PIC X(02) VALUE SPACES.
-
+       
        PROCEDURE DIVISION.
 
        1000-START-OF-JOB.
@@ -107,9 +109,10 @@
            RETURN SORT-FILE
                AT END
                    GO TO 3000-SORT-EXIT.
-
-      **** WRITE OUTPUT RECORD     [FILE NOT NEEDED FOR TESTING DEFECT]
-
+           
+           DISPLAY 'DF05TEST SORT RECORD = ' SORT-RECORD
+                                             UPON CONSOLE.
+           
            GO TO 3000-RETURN-SORT-RECORDS.
 
        3000-SORT-EXIT. EXIT.
@@ -130,4 +133,4 @@
            DISPLAY 'DF05TEST END OF JOB' UPON CONSOLE.
 
            GOBACK.
-
+

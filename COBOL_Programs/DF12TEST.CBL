@@ -48,18 +48,30 @@
            COMPUTE WS-NUMERIC-RESULT = FUNCTION NUMVAL
                                        (WS-NUMERIC-FIELD-1)
            END-COMPUTE.
+           
+           DISPLAY 'DF12TEST NUMERIC RESULT 1 = ' WS-NUMERIC-RESULT
+                                                  UPON CONSOLE.
           
            COMPUTE WS-NUMERIC-RESULT = FUNCTION NUMVAL
                                        (WS-NUMERIC-FIELD-2)
            END-COMPUTE.
            
+           DISPLAY 'DF12TEST NUMERIC RESULT 2 = ' WS-NUMERIC-RESULT
+                                                  UPON CONSOLE.
+           
            COMPUTE WS-NUMERIC-RESULT = FUNCTION NUMVAL
                                        (WS-NUMERIC-FIELD-3)
            END-COMPUTE.
+           
+           DISPLAY 'DF12TEST NUMERIC RESULT 3 = ' WS-NUMERIC-RESULT
+                                                  UPON CONSOLE.
           
            COMPUTE WS-NUMERIC-RESULT = FUNCTION NUMVAL
                                        (WS-NUMERIC-FIELD-4)
            END-COMPUTE.
+           
+           DISPLAY 'DF12TEST NUMERIC RESULT 4 = ' WS-NUMERIC-RESULT
+                                                  UPON CONSOLE.
       **** AFTER CODE ENDS (CORRECT)
 
        1000-END-OF-JOB.
