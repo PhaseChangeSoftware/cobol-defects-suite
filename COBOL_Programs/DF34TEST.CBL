@@ -6,7 +6,7 @@
 
       ******************************************************************
       ****   ISSUE IN COMPARING TWO SIGNED GROUP LEVEL VARIABLES    ****
-      ****   (CAUSED BY NOT COMPARING AT LOWER LEVEL VARIABLES)     ****
+      ****   (CAUSED BY NOT COMPARING AT FIELD LEVEL VARIABLES)     ****
       ******************************************************************
 
        ENVIRONMENT DIVISION.
@@ -57,10 +57,10 @@
        1000-COMPARE-FIELDS.
 
       **** BEFORE CODE BEGINS (PROBLEM)
-      **** IF VARIABLE-1 < VARIABLE-2     [SHOULD COMPARE LOWER LEVELS]
-      ****     DISPLAY 'DF34TEST COMPARE WORKED' UPON CONSOLE
+      **** IF VARIABLE-1 < VARIABLE-2      [SHOULD COMPARE FIELD LEVELS]
+      ****     DISPLAY 'DF34TEST GROUP LEVELS WORKED' UPON CONSOLE
       **** ELSE
-      ****     DISPLAY 'DF34TEST COMPARE FAILED' UPON CONSOLE
+      ****     DISPLAY 'DF34TEST GROUP LEVELS FAILED' UPON CONSOLE
       **** END-IF.
       **** BEFORE CODE ENDS (PROBLEM)
 
@@ -68,9 +68,9 @@
            IF (WS-VAR-1 < WS-VAR-3)
               AND
               (WS-VAR-2 < WS-VAR-4)
-               DISPLAY 'DF34TEST COMPARE FAILED' UPON CONSOLE
+               DISPLAY 'DF34TEST FIELD LEVELS FAILED' UPON CONSOLE
            ELSE
-               DISPLAY 'DF34TEST COMPARE WORKED' UPON CONSOLE
+               DISPLAY 'DF34TEST FIELD LEVELS WORKED' UPON CONSOLE
            END-IF.
       **** AFTER CODE ENDS (CORRECT)
 

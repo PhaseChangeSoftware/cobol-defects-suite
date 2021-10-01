@@ -22,15 +22,14 @@
        WORKING-STORAGE SECTION.
 
       **** BEFORE CODE BEGINS (PROBLEM)
-      *01 WS-RAND                      PIC 9(1)V   VALUE ZEROES.
+      *01 WS-RAND                      PIC S9(1)   VALUE ZERO.
       *                                [SHOULD BE PACKED FIELD]
-      *01 WS-RAND-DISP                  PIC S9(1)   VALUE ZEROES.
+      *01 WS-RAND-DISPLAY              PIC S9(1)   VALUE ZERO.
       **** BEFORE CODE ENDS (PROBLEM)
 
       **** AFTER CODE BEGINS (CORRECT)
-       01 WS-RAND                        PIC S9(1)  VALUE +9
-                                                   USAGE COMP-3.
-       01 WS-RAND-DISP                   PIC S9(1)  VALUE ZEROES.
+       01 WS-RAND                      PIC S9(1)   VALUE ZERO   COMP-3.
+       01 WS-RAND-DISPLAY              PIC 9(1)    VALUE ZERO.
       **** AFTER CODE ENDS (CORRECT)
 
        PROCEDURE DIVISION.
@@ -41,21 +40,15 @@
 
        1000-START-OF-JOB.
 
-      **** BEFORE CODE BEGINS (PROBLEM)
-      **** EXEC SQL
-      **** SELECT DECIMAL(WS-RAND() * 10)
-      **** INTO :WS-RAND
-      **** FROM SYSIBM.SYSDUMMY1
-      **** END-EXEC.
-      **** BEFORE CODE ENDS (PROBLEM)
-
-      **** AFTER CODE BEGINS (CORRECT)
-      ******************************************************************
-      ****    NO SQL DIRECIVES HAVE NOT BEEN SET IN DEVELOPER YET   ****
-      ******************************************************************
-      **** AFTER CODE ENDS (CORRECT)
-
-           DISPLAY 'DF14TEST RANDOM NUMBER = ' WS-RAND-DISP
+           EXEC SQL
+           SELECT DECIMAL(RAND() * 10)
+           INTO :WS-RAND
+           FROM SYSIBM.SYSDUMMY1
+           END-EXEC.
+      
+           MOVE WS-RAND                TO WS-RAND-DISPLAY.
+           
+           DISPLAY 'DF14TEST RANDOM NUMBER = ' WS-RAND-DISPLAY
                                                UPON CONSOLE.
            
        1000-END-OF-JOB.

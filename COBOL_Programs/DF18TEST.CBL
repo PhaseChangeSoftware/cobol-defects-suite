@@ -6,8 +6,7 @@
 
       ******************************************************************
       ****   SET STATEMENT FOR WS-POINTER DISCARDED BY COMPILER     ****
-      ****   (CAUSE OF DEFECT IS USAGE OF POINTER FOR WS-POINTER)   ****
-      ****   (CAUSE OF DEFECT IS INVALID SET STATEMENTS (PENDING)   ****
+      ****   (CAUSE OF DEFECT IS INVALID USE OF ADDRESS POINTER)    ****
       ******************************************************************
 
        ENVIRONMENT DIVISION.
@@ -27,14 +26,18 @@
       *                                [INCORRECT USAGE OF POINTER]
       **** BEFORE CODE ENDS (PROBLEM)
 
-      **** AFTER CODE BEGINS (CORRECT)
-       01  WS-POINTER                  PIC 9(08)   VALUE ZERO  COMP.
-      **** AFTER CODE ENDS (CORRECT)
-
        LINKAGE SECTION.
-
-       01  WS-ADDRESS                  USAGE IS POINTER.
-       01  WS-VARIABLE                 PIC 9(08)   COMP.
+       
+      **** BEFORE CODE BEGINS (PROBLEM)
+      *01  WS-ADDRESS                  USAGE IS POINTER.
+      *                                [INCORRECT USAGE OF POINTER]
+      *01  WS-VARIABLE                 PIC X(08).
+      **** BEFORE CODE ENDS (PROBLEM)
+      
+      **** AFTER CODE BEGINS (CORRECT)
+       01  WS-ADDRESS                  PIC 9(04)  COMP.
+       01  WS-VARIABLE                 PIC X(08).
+      **** AFTER CODE ENDS (CORRECT)
 
        PROCEDURE DIVISION              USING WS-ADDRESS
                                              WS-VARIABLE.
@@ -52,10 +55,7 @@
       **** BEFORE CODE ENDS (PROBLEM)
 
       **** AFTER CODE BEGINS (CORRECT)
-           SET ADDRESS OF WS-VARIABLE  TO WS-ADDRESS.
-      **** SET WS-POINTER              TO WS-ADDRESS.    [PENDING SET] 
-           ADD LENGTH  OF WS-VARIABLE  TO WS-POINTER.   
-      **** MOVE WS-POINTER             TO WS-VARIABLE.
+           ADD LENGTH OF WS-VARIABLE   TO WS-ADDRESS.
       **** AFTER CODE ENDS (CORRECT)
 
        1000-END-OF-JOB.
@@ -63,4 +63,3 @@
            DISPLAY 'DF18TEST END OF JOB' UPON CONSOLE.
 
            GOBACK.
-
