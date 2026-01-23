@@ -15,11 +15,10 @@ This repository contains **43 COBOL programs** recreated from actual developer q
 ## Repository Structure
 
 Each program includes:
-- **Problem Statement**: Clear description of the defect
-- **Defective Code**: Original buggy code (commented out)
-- **Fixed Code**: Corrected implementation
+- **Problem Statement**: Clear description of the defect (in file header)
+- **Defective Code**: Original buggy code (commented out with `****`)
+- **Fixed Code**: Corrected implementation (active code)
 - **Supporting Files**: JCL scripts, data files, SQL tables as needed
-- **Metadata**: ODC (Orthogonal Defect Classification) type and qualifier
 
 ## Defect Distribution
 
