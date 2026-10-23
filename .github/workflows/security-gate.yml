@@ -105,7 +105,7 @@ jobs:
       # to merge: blocking those would be unrecoverable, since nobody holds
       # bypass. Removing an old secret is remediation work, not a merge gate.
       - name: Scan for verified secrets
-        uses: trufflesecurity/trufflehog@v3.99.2
+        uses: trufflesecurity/trufflehog@v3.99.3
         with:
           version: ${{ env.TRUFFLEHOG_VERSION }}
           base: ${{ steps.range.outputs.base }}
