@@ -1,0 +1,276 @@
+# ============================================================
+# Security Gate (public repositories) - dependency and secret scanning
+# ------------------------------------------------------------
+# A copy of devops-actions/.github/workflows/tier1-security-gate.yml for the two
+# public repositories, .github and cobol-defects-suite.
+#
+# Why a copy: GitHub will not let a repository require or call a workflow from a
+# less visible one, and devops-actions is internal. So the Standard Rules
+# ruleset, which runs the gate everywhere else, excludes public repositories
+# (enforceability ADR, devops kb/adr/github-use-policy-enforceability-amendment.md).
+# Without a check of their own they fail GitHub Use Policy §3.1 items 4 and 5:
+# "required status checks" and "branches up to date" need a check to require.
+#
+# The jobs are named exactly as in the internal gate ("Secret scanning",
+# "Dependency scanning"), so the public repo ruleset requires the same checks
+# every private repository's ruleset does
+# (devops docs/rulesets/default-branch-protection-public.json).
+#
+# KEEP IN STEP WITH THE INTERNAL GATE. DevOps owns both. The logic below is the
+# internal gate's, unchanged; only this header and the pin check differ. When the
+# internal gate changes, copy the change here.
+#
+# WHAT BLOCKS A MERGE (same as the internal gate)
+#   1. A verified secret in the commits this pull request adds.
+#   2. A Critical or High dependency vulnerability this pull request introduces,
+#      measured against the base branch.
+# Pre-existing vulnerabilities, old secrets in history, a repository with no
+# lockfile, and an OSV download failure do not block.
+#
+# Pull requests from forks run here too: the workflow needs only read access,
+# and GitHub gives fork pull requests a read-only token and no secrets.
+# ============================================================
+
+name: Security Gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned deliberately. An unpinned scanner is a third party who can block
+  # merges by shipping a release.
+  OSV_SCANNER_VERSION: v1.9.2
+  # Pinned exactly, not `latest`, and with no `v`: the action runs
+  # `docker run <image>:<version>`, and the container tag is 3.99.2 where the
+  # git tag is v3.99.2. Must equal the trufflehog action ref in the secret-scan
+  # job minus the `v`. Dependabot bumps that ref but not this value, so the
+  # "Pins in step" step fails its pull request until this line is updated too.
+  TRUFFLEHOG_VERSION: 3.99.2
+  # Severities that block when NEWLY introduced. See the header.
+  DEPENDENCY_SEVERITY: 'CRITICAL,HIGH'
+
+jobs:
+  secret-scan:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    steps:
+      # Full history: the scan diffs base against head, and a shallow clone does
+      # not contain the base commit.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # The internal gate has a separate Tier 1 Gate Check workflow for this.
+      # Here it is a step: a Dependabot pull request that bumps the trufflehog
+      # action without TRUFFLEHOG_VERSION fails, so the two cannot drift apart.
+      - name: Pins in step
+        run: |
+          set -uo pipefail
+          ref=$(grep -oE 'trufflesecurity/trufflehog@v[0-9.]+' .github/workflows/security-gate.yml | head -1 | sed 's/.*@v//')
+          if [ "$ref" != "${TRUFFLEHOG_VERSION}" ]; then
+            echo "::error::trufflehog action is v${ref} but TRUFFLEHOG_VERSION is ${TRUFFLEHOG_VERSION}. Set TRUFFLEHOG_VERSION to ${ref}."
+            exit 1
+          fi
+
+      # A manual run has no pull request, and the action treats an empty
+      # base/head as "scan everything". In a repository that committed a secret
+      # years ago that reports the whole of its past, which is noise rather than
+      # a finding about the change in front of us. Pin the range to the last
+      # commit instead. (This only affects workflow_dispatch; on pull_request the
+      # action sets base and head from the pull request itself.)
+      - name: Range for a manual run
+        id: range
+        if: github.event_name != 'pull_request'
+        run: |
+          set -uo pipefail
+          echo "base=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # --results=verified is the reason this blocks at all. An unverified match
+      # is a string that LOOKS like a credential; across 94 repositories of
+      # varying age that would block merges on false positives with no bypass to
+      # clear them. Verified means TruffleHog confirmed the credential is live
+      # against its provider — worth stopping a merge for.
+      #
+      # On pull_request the action scans base..head only. It does NOT scan
+      # history, which is what keeps a repository with an old secret in it able
+      # to merge: blocking those would be unrecoverable, since nobody holds
+      # bypass. Removing an old secret is remediation work, not a merge gate.
+      - name: Scan for verified secrets
+        uses: trufflesecurity/trufflehog@v3.99.2
+        with:
+          version: ${{ env.TRUFFLEHOG_VERSION }}
+          base: ${{ steps.range.outputs.base }}
+          head: ${{ steps.range.outputs.head }}
+          extra_args: --results=verified
+
+  dependency-scan:
+    name: Dependency scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # A repository with no lockfile has nothing for OSV to read. That is the
+      # normal state for both public repositories today, and it passes.
+      - name: Look for lockfiles
+        id: detect
+        run: |
+          set -uo pipefail
+          find . -type f \( \
+            -name 'package-lock.json' -o -name 'yarn.lock' -o -name 'pnpm-lock.yaml' -o \
+            -name 'requirements.txt' -o -name 'poetry.lock' -o -name 'Pipfile.lock' -o \
+            -name 'uv.lock' -o -name 'go.sum' -o -name 'Cargo.lock' -o \
+            -name 'Gemfile.lock' -o -name 'composer.lock' -o -name 'gradle.lockfile' -o \
+            -name 'packages.lock.json' -o -name 'pubspec.lock' -o -name 'mix.lock' -o \
+            -name 'conan.lock' \) \
+            -not -path '*/node_modules/*' -not -path '*/vendor/*' \
+            -not -path '*/build/*' -not -path '*/dist/*' -not -path '*/target/*' \
+            > /tmp/lockfiles.txt 2>/dev/null || true
+          COUNT=$(wc -l < /tmp/lockfiles.txt | tr -d ' ')
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "Found ${COUNT} lockfile(s)"
+          sed 's/^/  /' /tmp/lockfiles.txt
+
+      - name: Nothing to scan
+        if: steps.detect.outputs.count == '0'
+        run: |
+          {
+            echo "## Dependency scanning"
+            echo ""
+            echo "No lockfiles found — nothing for OSV to read. Passing."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install OSV Scanner
+        id: install
+        if: steps.detect.outputs.count != '0'
+        run: |
+          set -uo pipefail
+          url="https://github.com/google/osv-scanner/releases/download/${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
+          if curl -fsSL "$url" -o /tmp/osv-scanner && chmod +x /tmp/osv-scanner; then
+            sudo mv /tmp/osv-scanner /usr/local/bin/osv-scanner
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+            osv-scanner --version || true
+          else
+            echo "::warning::OSV Scanner could not be installed; dependency scanning did not run."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Scanned twice — head and base — because only the difference blocks.
+      # Reporting the head's total would block on inherited debt, which §4.1 does
+      # not ask for and which would stop every repository merging on day one.
+      - name: Compare this pull request against the base branch
+        if: steps.detect.outputs.count != '0' && steps.install.outputs.ok == 'true'
+        run: |
+          set -uo pipefail
+
+          # Severity lives in results[].packages[].groups[].max_severity as a
+          # numeric CVSS base score ("7.5"), NOT as a rating.
+          # vulnerabilities[].severity is a CVSS vector string and
+          # database_specific carries no severity at all — reading either yields
+          # UNKNOWN for every finding and a gate that blocks nothing. Verified
+          # against real osv-scanner v1.9.2 output before this was written.
+          # Inline rather than a heredoc: a heredoc terminator inside a YAML
+          # block scalar is indented, and `<<'EOF'` requires it at column 0, so
+          # the redirect would swallow the rest of this script.
+          flatten () {  # $1 = osv json, $2 = tsv out
+            if [ -s "$1" ]; then
+              jq -r '
+                [ .results[]?.packages[]?
+                  | .package.name as $pkg
+                  | .groups[]?
+                  | (.max_severity // "" | if . == "" then -1 else tonumber end) as $score
+                  | ( if   $score >= 9.0 then "CRITICAL"
+                      elif $score >= 7.0 then "HIGH"
+                      elif $score >= 4.0 then "MEDIUM"
+                      elif $score >= 0.1 then "LOW"
+                      else "UNKNOWN" end ) as $band
+                  | .ids[]? | [., $band, $pkg]
+                ] | unique | .[] | @tsv
+              ' "$1" 2>/dev/null | sort -u > "$2" || : > "$2"
+            else
+              : > "$2"
+            fi
+          }
+
+          scan_into () {  # $1 = output json
+            osv-scanner scan --recursive --format=json --output="$1" . >/dev/null 2>&1 || true
+            [ -s "$1" ] || echo '{"results":[]}' > "$1"
+          }
+
+          scan_into /tmp/head.json
+          flatten /tmp/head.json /tmp/head.tsv
+
+          : > /tmp/base.tsv
+          COMPARED=no
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            if git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+              git checkout -q --force "${BASE}"
+              scan_into /tmp/base.json
+              flatten /tmp/base.json /tmp/base.tsv
+              git checkout -q --force "${{ github.event.pull_request.head.sha }}"
+              COMPARED=yes
+            else
+              echo "::warning::Base commit unavailable; reporting findings without comparison."
+            fi
+          fi
+
+          HEAD_N=$(wc -l < /tmp/head.tsv | tr -d ' ')
+          BASE_N=$(wc -l < /tmp/base.tsv | tr -d ' ')
+
+          comm -13 <(cut -f1 /tmp/base.tsv) <(cut -f1 /tmp/head.tsv) > /tmp/new-ids.txt || : > /tmp/new-ids.txt
+          # grep -c prints "0" on no match AND exits 1, so `|| echo 0` would append
+          # a second line and every later integer test would error out.
+          NEW_N=$(grep -c . /tmp/new-ids.txt || true)
+
+          : > /tmp/blocking.tsv
+          while read -r id; do
+            [ -n "$id" ] || continue
+            awk -F'\t' -v i="$id" '$1==i && ($2=="CRITICAL" || $2=="HIGH")' /tmp/head.tsv >> /tmp/blocking.tsv
+          done < /tmp/new-ids.txt
+          BLOCK_N=$(grep -c . /tmp/blocking.tsv || true)
+
+          {
+            echo "## Dependency scanning"
+            echo ""
+            if [ "$COMPARED" = "yes" ]; then
+              echo "This branch: **${HEAD_N}** known vulnerabilities · base: **${BASE_N}** · introduced here: **${NEW_N}**"
+            else
+              echo "This branch: **${HEAD_N}** known vulnerabilities (no base comparison available)"
+            fi
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$BLOCK_N" -gt 0 ]; then
+            echo "::error::${BLOCK_N} new CRITICAL/HIGH dependency vulnerability(ies) introduced by this pull request."
+            {
+              echo "### Blocking — ${BLOCK_N} newly introduced CRITICAL/HIGH finding(s)"
+              echo ""
+              awk -F'\t' '{printf "- **%s** `%s` — [%s](https://osv.dev/vulnerability/%s)\n", $2, $3, $1, $1}' /tmp/blocking.tsv
+              echo ""
+              echo "Only vulnerabilities this pull request introduces block. Pre-existing ones do not."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          {
+            if [ "$NEW_N" -gt 0 ]; then
+              echo "${NEW_N} vulnerability(ies) introduced, none CRITICAL or HIGH. Not blocking."
+            else
+              echo "No new vulnerabilities introduced by this pull request."
+            fi
+            if [ "$BASE_N" -gt 0 ]; then
+              echo ""
+              echo "<sub>${BASE_N} pre-existing vulnerability(ies) on the base branch are not blocked here — that is remediation work, not a merge gate.</sub>"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
