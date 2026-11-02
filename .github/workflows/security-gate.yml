@@ -53,7 +53,7 @@ env:
   # git tag is v3.99.2. Must equal the trufflehog action ref in the secret-scan
   # job minus the `v`. Dependabot bumps that ref but not this value, so the
   # "Pins in step" step fails its pull request until this line is updated too.
-  TRUFFLEHOG_VERSION: 3.99.2
+  TRUFFLEHOG_VERSION: 3.99.7
   # Severities that block when NEWLY introduced. See the header.
   DEPENDENCY_SEVERITY: 'CRITICAL,HIGH'
 
@@ -105,7 +105,7 @@ jobs:
       # to merge: blocking those would be unrecoverable, since nobody holds
       # bypass. Removing an old secret is remediation work, not a merge gate.
       - name: Scan for verified secrets
-        uses: trufflesecurity/trufflehog@v3.99.2
+        uses: trufflesecurity/trufflehog@v3.99.7
         with:
           version: ${{ env.TRUFFLEHOG_VERSION }}
           base: ${{ steps.range.outputs.base }}
